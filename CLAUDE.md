@@ -138,6 +138,14 @@ Arquivo gerado anteriormente: `relogio_esp32.ino`
 
 ---
 
+## Painel web (simulador)
+
+- Fonte: `docs/index.html` (resumo do projeto + simulador 240×240 com Picture-in-Picture).
+- Publicado no GitHub Pages a partir da branch `gh-pages` (arquivo `index.html` na raiz): https://roxo-luis13.github.io/gadgetmesa.esp/
+- Ao mudar `docs/index.html`, copiar para `index.html` na `gh-pages` e dar push para atualizar o site.
+
+---
+
 ## Como trabalhar neste projeto
 
 - Comunicação em **português**, pedidos curtos e diretos.
