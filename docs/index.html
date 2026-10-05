@@ -108,7 +108,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
         </div>
         <button id="pipBtn" class="pip">Abrir em Picture-in-Picture</button>
         <button id="waterBtn">Testar "Beba Água!"</button>
-        <button id="autoBtn" aria-pressed="false">Alternar telas sozinho</button>
+        <button id="autoBtn" aria-pressed="true">Trocar tela a cada 30 s</button>
       </div>
       <p id="pipMsg" class="note">O relógio flutua sobre as outras janelas e continua atualizando.</p>
       <video id="pipVideo" class="pipsrc" muted playsinline></video>
@@ -245,7 +245,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
 (function(){
   const cv=document.getElementById('tft'), g=cv.getContext('2d');
   const W=240,H=240;
-  let screen=0, auto=false, autoTick=0, forceWaterUntil=0;
+  let screen=0, auto=true, autoTick=Date.now(), forceWaterUntil=0;
   let weather={temp:26,feels:27,hum:58,wind:9,code:2,max:29,min:17,example:true};
 
   const DIAS=['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
@@ -289,11 +289,11 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
   function draw(){
     const t=br();
     g.fillStyle='#000';g.fillRect(0,0,W,H);
-    if(auto&&Date.now()-autoTick>6000){autoTick=Date.now();setScreen((screen+1)%3);}
+    if(auto&&Date.now()-autoTick>=30000){autoTick=Date.now();setScreen((screen+1)%3);}
     if(screen===0)drawClock(t);else if(screen===1)drawTest();else drawWeather();
     dots();
   }
-  function setScreen(i){screen=i;[0,1,2].forEach(k=>document.getElementById('b'+k).setAttribute('aria-pressed',String(k===i)));draw();}
+  function setScreen(i){screen=i;autoTick=Date.now();[0,1,2].forEach(k=>document.getElementById('b'+k).setAttribute('aria-pressed',String(k===i)));draw();}
   document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>setScreen(+b.dataset.s)));
   document.getElementById('waterBtn').addEventListener('click',()=>{forceWaterUntil=Date.now()+7000;setScreen(0);});
   const autoBtn=document.getElementById('autoBtn');
