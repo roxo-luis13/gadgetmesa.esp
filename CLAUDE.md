@@ -141,7 +141,7 @@ Arquivo gerado anteriormente: `relogio_esp32.ino`
 ## Painel web (simulador)
 
 - Fonte: `docs/index.html`: só o preview da tela 240×240 e as configurações (telas, Pomodoro, Picture-in-Picture).
-- Telas no preview: Relógio, Bolsa B3, Clima e Pomodoro (foco 25 / pausa curta 5 / pausa longa 15 / 4 ciclos, configuráveis; no fim pisca vermelho/preto até tocar, como a build despertador). A hora aparece em todas as telas.
+- Telas no preview: Relógio, Bolsa B3, Clima e Pomodoro (foco 25 / pausa curta 5 / pausa longa 15 / 4 ciclos, configuráveis; no fim pisca vermelho/preto até tocar, como a build despertador; ao confirmar o fim do foco, a pausa começa sozinha). A hora aparece em todas as telas.
 - Publicado no GitHub Pages a partir da branch `gh-pages` (arquivo `index.html` na raiz): https://roxo-luis13.github.io/gadgetmesa.esp/
 - Ao mudar `docs/index.html`, copiar para `index.html` na `gh-pages` e dar push para atualizar o site.
 
