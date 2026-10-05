@@ -257,7 +257,14 @@ button.go{background:var(--accent);border-color:var(--accent);color:var(--surfac
     if(pomo.running&&Date.now()>=pomo.endAt){pomo.running=false;pomo.remaining=0;pomo.alert=true;beep();setScreen(3);}
     pomoUI();
   }
-  function ack(){if(!pomo.alert)return false;pomo.alert=false;advance();autoTick=Date.now();pomoUI();return true;}
+  function ack(){
+    if(!pomo.alert)return false;
+    const fimDoFoco=pomo.mode==='foco';
+    pomo.alert=false;advance();autoTick=Date.now();
+    // ao confirmar o fim do foco, a pausa já começa a contar
+    if(fimDoFoco){pomo.endAt=Date.now()+pomo.remaining;pomo.running=true;}
+    pomoUI();return true;
+  }
   function drawPomo(){
     const M=MODES[pomo.mode];
     if(pomo.alert){
