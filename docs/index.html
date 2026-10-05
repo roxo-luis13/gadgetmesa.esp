@@ -384,18 +384,26 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
   function saveSize(){try{localStorage.setItem('pipSize',String(pipSize));}catch(e){}markSize();}
   // janela quadrada; o navegador só deixa redimensionar a partir de um clique
   function resizePip(delta,abs){
-    if(!pipWin){if(abs){pipSize=abs;saveSize();}return;}
+    if(!pipWin){
+      if(abs){pipSize=abs;saveSize();}
+      if(document.pictureInPictureElement)say('Neste modo (Picture-in-Picture de vídeo) quem manda no tamanho é o navegador, e ele tem um tamanho mínimo. Para diminuir mais, abra a página fora do Claude no Chrome ou Edge.',true);
+      return;
+    }
     const cur=Math.min(pipWin.innerWidth,pipWin.innerHeight);
     const n=Math.max(160,Math.min(900,abs||cur+delta));
     try{pipWin.resizeBy(n-pipWin.innerWidth,n-pipWin.innerHeight);}catch(e){}
     pipSize=n;saveSize();
   }
-  szBtns.forEach(b=>b.addEventListener('click',()=>resizePip(0,+b.dataset.sz)));
+  szBtns.forEach(b=>b.addEventListener('click',async()=>{
+    const v=+b.dataset.sz;
+    if(pipWin){pipSize=v;saveSize();try{await docPip();}catch(e){resizePip(0,v);}return;}
+    resizePip(0,v);
+  }));
   markSize();
   async function docPip(){
     const pw=await window.documentPictureInPicture.requestWindow({width:pipSize,height:pipSize});
     pipWin=pw;
-    pw.addEventListener('resize',()=>{pipSize=Math.round(Math.min(pw.innerWidth,pw.innerHeight));saveSize();});
+    pw.addEventListener('resize',()=>{if(pipWin!==pw)return;pipSize=Math.round(Math.min(pw.innerWidth,pw.innerHeight));saveSize();});
     const st=pw.document.createElement('style');
     st.textContent='html,body{margin:0;height:100%;background:#000;overflow:hidden}body{display:grid;place-items:center}'+
       '.z{position:fixed;top:6px;right:6px;display:flex;gap:4px;opacity:0;transition:opacity .2s}body:hover .z{opacity:1}'+
@@ -408,14 +416,14 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     cv.style.cssText='width:100vmin;height:100vmin;border:0;border-radius:0';
     pw.document.body.append(cv,z);
     say('Relógio em Picture-in-Picture. Mude o tamanho arrastando a borda da janelinha, pelos botões − e + que aparecem nela ou pelos botões abaixo.');
-    pw.addEventListener('pagehide',()=>{pipWin=null;cv.style.cssText='';holder.insertBefore(cv,next);say('O relógio flutua sobre as outras janelas e continua atualizando.');});
+    pw.addEventListener('pagehide',()=>{if(pipWin!==pw)return;pipWin=null;cv.style.cssText='';holder.insertBefore(cv,next);say('O relógio flutua sobre as outras janelas e continua atualizando.');});
   }
   // 2) Video PiP (Safari, Firefox, Chrome): transmite o canvas para um <video>
   async function videoPip(){
     if(!vid.srcObject)vid.srcObject=cv.captureStream(20);
     await vid.play();
     await vid.requestPictureInPicture();
-    say('Relógio aberto em Picture-in-Picture.');
+    say('Relógio em Picture-in-Picture de vídeo. Aqui o tamanho é controlado pelo navegador: arraste o canto da janelinha, mas ela não fica menor que o mínimo dele. Para diminuir à vontade, abra a página fora do Claude no Chrome ou Edge.');
     vid.addEventListener('leavepictureinpicture',()=>say('O relógio flutua sobre as outras janelas e continua atualizando.'),{once:true});
   }
   pipBtn.addEventListener('click',async()=>{
