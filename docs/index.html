@@ -9,27 +9,28 @@
 <style>
 /* Layout: bancada — o simulador do TFT à esquerda (fixo), a ficha do projeto à direita; empilha no celular */
 :root{
-  --bg:#eef1ee; --surface:#f8faf8; --line:#cdd6d0; --fg:#18211c; --muted:#56635b;
-  --accent:#0f7a5c; --accent-soft:#d6ece3; --warn:#a65d00; --warn-soft:#f6e6cf;
-  --pcb:#1d3b2f; --pcb-edge:#12271e;
+  --bg:#f5f2fb; --surface:#fffdfc; --line:#ddd3ee; --fg:#1d1430; --muted:#5f5475;
+  --accent:#7b3fe4; --accent-soft:#ece2fc; --warn:#c2410c; --warn-soft:#fde7da;
+  --pcb:#2a1b5c; --pcb-edge:#1a0f3d;
   --display:"Chakra Petch",ui-sans-serif,system-ui,sans-serif;
   --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --rainbow:linear-gradient(90deg,#FF3D7F 0 16.6%,#FF8A3D 0 33.3%,#FFE14D 0 50%,#3DFF8A 0 66.6%,#3DC8FF 0 83.3%,#9B5CFF 0);
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#111613; --surface:#18201b; --line:#2b3730; --fg:#e3ebe6; --muted:#97a69d;
-  --accent:#4cc79d; --accent-soft:#183a2d; --warn:#e9a64a; --warn-soft:#3a2b16;
-  --pcb:#163026; --pcb-edge:#0b1712; color-scheme:dark}}
+  --bg:#120d1f; --surface:#1b142c; --line:#33284a; --fg:#ece6f8; --muted:#a59bbd;
+  --accent:#b18cff; --accent-soft:#2c1f4d; --warn:#ff9a62; --warn-soft:#3d2216;
+  --pcb:#24184e; --pcb-edge:#120a2b; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#111613; --surface:#18201b; --line:#2b3730; --fg:#e3ebe6; --muted:#97a69d;
-  --accent:#4cc79d; --accent-soft:#183a2d; --warn:#e9a64a; --warn-soft:#3a2b16;
-  --pcb:#163026; --pcb-edge:#0b1712; color-scheme:dark}
+  --bg:#120d1f; --surface:#1b142c; --line:#33284a; --fg:#ece6f8; --muted:#a59bbd;
+  --accent:#b18cff; --accent-soft:#2c1f4d; --warn:#ff9a62; --warn-soft:#3d2216;
+  --pcb:#24184e; --pcb-edge:#120a2b; color-scheme:dark}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.55;margin:0}
 .wrap{max-width:1120px;margin:0 auto;padding-inline:20px;padding-block:28px 56px}
 header.top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 24px;margin-bottom:24px}
-h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4vw,2.4rem);letter-spacing:.01em;margin:0;text-wrap:balance}
+h1{background:var(--rainbow);background-size:100% 5px;background-repeat:no-repeat;background-position:0 100%;padding-bottom:8px;display:inline-block;font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4vw,2.4rem);letter-spacing:.01em;margin:0;text-wrap:balance}
 .sub{color:var(--muted);margin:0}
 .chip{font-family:var(--mono);font-size:12px;padding:2px 8px;border-radius:4px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
 
@@ -42,7 +43,8 @@ h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,4vw,2.4rem)
 .board{background:var(--pcb);border:1px solid var(--pcb-edge);border-radius:14px;padding:22px 22px 14px;
   background-image:radial-gradient(circle at 12px 12px,#c9a64a 0 3px,transparent 3.5px),radial-gradient(circle at calc(100% - 12px) 12px,#c9a64a 0 3px,transparent 3.5px),radial-gradient(circle at 12px calc(100% - 12px),#c9a64a 0 3px,transparent 3.5px),radial-gradient(circle at calc(100% - 12px) calc(100% - 12px),#c9a64a 0 3px,transparent 3.5px)}
 .screen{display:block;width:100%;max-width:100%;aspect-ratio:1/1;background:#000;border:6px solid #050505;border-radius:4px;image-rendering:pixelated}
-.silk{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:#b9d3c6;margin-top:10px;letter-spacing:.06em}
+.rainbow{height:5px;border-radius:3px;background:var(--rainbow);margin-top:12px}
+.silk{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:#d9ccff;margin-top:10px;letter-spacing:.06em}
 .controls{display:flex;flex-wrap:wrap;gap:8px}
 button{font:500 14px var(--body);border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:8px 12px;border-radius:6px;cursor:pointer}
 button:hover{border-color:var(--accent)}
@@ -98,6 +100,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     <aside class="bench" aria-label="Simulador da tela">
       <div class="board">
         <canvas id="tft" class="screen" width="240" height="240" aria-label="Tela TFT simulada"></canvas>
+        <div class="rainbow"></div>
         <div class="silk"><span>TFT 240×240</span><span>ESP32-WROOM</span></div>
       </div>
       <div class="controls">
@@ -257,57 +260,73 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
   function greet(h){return h>=5&&h<12?'Bom dia!':h>=12&&h<18?'Boa tarde!':'Boa noite!';}
 
   function text(t,y,size,color,weight){g.font=(weight||600)+' '+size+'px "Chakra Petch", ui-monospace, monospace';g.fillStyle=color;g.textAlign='center';g.textBaseline='middle';g.fillText(t,W/2,y);}
-  function dots(){for(let i=0;i<3;i++){g.beginPath();g.arc(W/2+(i-1)*14,228,i===screen?4:3,0,Math.PI*2);g.fillStyle=i===screen?'#FFFFFF':'#4A4A4A';g.fill();}}
+  // Paleta "criativa" — todas as cores existem em RGB565 e os degradês viram fillRectVGradient() no TFT_eSPI
+  const RAINBOW=['#FF3D7F','#FF8A3D','#FFE14D','#3DFF8A','#3DC8FF','#9B5CFF'];
+  function grad(top,bot){const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,top);gr.addColorStop(1,bot);g.fillStyle=gr;g.fillRect(0,0,W,H);}
+  function rainbow(){RAINBOW.forEach((c,i)=>{g.fillStyle=c;g.fillRect(i*40,0,40,4);});}
+  function rrect(x,y,w,h,r,c){g.fillStyle=c;g.beginPath();g.roundRect(x,y,w,h,r);g.fill();}
+  function dots(){for(let i=0;i<3;i++){g.beginPath();g.arc(W/2+(i-1)*14,228,i===screen?4:3,0,Math.PI*2);g.fillStyle=i===screen?'#FFE14D':'#6B6B9E';g.fill();}}
+  function tag(){g.font='500 10px "IBM Plex Mono", monospace';g.fillStyle='#FFD1F0';g.textAlign='right';g.textBaseline='middle';g.fillText('exemplo',234,12);}
 
+  // céu muda com a saudação: manhã = nascer do sol, tarde = pôr do sol, noite = céu estrelado
+  function period(h){return h>=5&&h<12?{top:'#FF8A3D',bot:'#7A1FA2',hi:'#FFFFFF',sh:'#C2185B'}:h>=12&&h<18?{top:'#FF3D7F',bot:'#3B1C9E',hi:'#FFE14D',sh:'#5B1FA8'}:{top:'#1B1464',bot:'#0B0B2E',hi:'#7DF9FF',sh:'#9B5CFF'};}
+  const STARS=[[18,40],[60,22],[200,30],[222,64],[30,96],[214,140],[16,170],[226,196],[44,214],[190,214]];
   function drawClock(t){
-    text(greet(t.h),26,20,'#FFE000');
+    const P=period(t.h);grad(P.top,P.bot);rainbow();
+    if(t.h<5||t.h>=18){g.fillStyle='#FFFFFF';STARS.forEach(([x,y])=>g.fillRect(x,y,2,2));}
+    text(greet(t.h),28,20,P.hi);
     const nowMs=Date.now();
     // "Beba Água!": a cada 5 min, 7 s, pisca a cada 250 ms
     const inWindow=(t.m%5===0&&t.s<7)||nowMs<forceWaterUntil;
-    if(inWindow){
-      if(Math.floor(nowMs/250)%2===0) text('Beba Água!',74,30,'#00BFFF',700);
-    }
-    text(pad(t.h)+':'+pad(t.m),118,58,'#FFFFFF',700);
-    g.font='600 18px "Chakra Petch", ui-monospace, monospace';
-    text(':'+pad(t.s),156,18,'#9AA0A6');
-    text(DIAS[t.wd],182,18,'#00E08A');
-    text(pad(t.D)+' '+MESES[t.M]+' '+t.Y,204,16,'#C8C8C8',500);
+    if(inWindow&&Math.floor(nowMs/250)%2===0){rrect(30,56,180,36,18,'#00D1FF');text('Beba Água!',75,26,'#0B0B2E',700);}
+    const hm=pad(t.h)+':'+pad(t.m);
+    g.save();g.translate(3,3);text(hm,122,58,P.sh,700);g.restore();
+    text(hm,122,58,'#FFFFFF',700);
+    text(':'+pad(t.s),160,18,'#FFD1F0');
+    text(DIAS[t.wd],184,18,'#7DF9FF');
+    text(pad(t.D)+' '+MESES[t.M]+' '+t.Y,206,16,'#FFFFFF',500);
   }
   // ---------- Tela 2: Bolsa B3 ----------
   let market={ibov:131245,ibovChg:0.84,top:[{t:'MGLU3',p:9.87,c:5.42},{t:'AZUL4',p:6.15,c:4.07},{t:'CVCB3',p:2.38,c:3.48}],example:true};
   const brl=(n,d)=>n.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
   const pct=n=>(n>=0?'+':'')+brl(n,2)+'%';
   function drawMarket(){
-    text('Bolsa B3',22,18,'#FFE000');
-    text('IBOVESPA',50,13,'#9AA0A6',500);
+    grad('#123A8C','#0A0F2C');rainbow();
+    text('Bolsa B3',24,18,'#FFE14D');
+    text('IBOVESPA',50,13,'#9FC4FF',500);
     text(brl(market.ibov,0)+' pts',76,28,'#FFFFFF',700);
-    text(pct(market.ibovChg),102,16,market.ibovChg>=0?'#00E08A':'#FF4D4D');
-    g.fillStyle='#333333';g.fillRect(20,118,200,1);
-    text('MAIORES ALTAS',134,13,'#9AA0A6',500);
-    g.font='500 15px "IBM Plex Mono", ui-monospace, monospace';g.textBaseline='middle';
+    const up=market.ibovChg>=0;
+    rrect(84,92,72,20,10,up?'#3DFF8A':'#FF4D6D');
+    text((up?'▲ ':'▼ ')+pct(market.ibovChg).replace('+',''),102,14,'#0A0F2C',700);
+    text('MAIORES ALTAS',128,13,'#9FC4FF',500);
+    const medal=['#FF8A3D','#FF3D7F','#9B5CFF'];
     market.top.slice(0,3).forEach((a,i)=>{
-      const y=158+i*22;
-      g.textAlign='left';g.fillStyle='#FFFFFF';g.fillText(a.t,16,y);
-      g.textAlign='center';g.fillStyle='#C8C8C8';g.fillText(brl(a.p,2),126,y);
-      g.textAlign='right';g.fillStyle='#00E08A';g.fillText(pct(a.c),226,y);
+      const y=152+i*22;
+      rrect(10,y-10,220,20,6,'#1E2F70');
+      rrect(10,y-10,6,20,3,medal[i]);
+      g.font='500 15px "IBM Plex Mono", ui-monospace, monospace';g.textBaseline='middle';
+      g.textAlign='left';g.fillStyle='#FFE14D';g.fillText(a.t,22,y);
+      g.textAlign='center';g.fillStyle='#FFFFFF';g.fillText(brl(a.p,2),126,y);
+      g.textAlign='right';g.fillStyle='#3DFF8A';g.fillText(pct(a.c),224,y);
     });
-    if(market.example){g.font='500 10px "IBM Plex Mono", monospace';g.fillStyle='#A65D00';g.textAlign='right';g.fillText('exemplo',234,10);}
+    if(market.example)tag();
   }
   function wDesc(c){if(c===0)return'Céu limpo';if(c<=2)return'Parcial nublado';if(c===3)return'Nublado';if(c<=48)return'Neblina';if(c<=67)return'Chuva';if(c<=77)return'Neve';if(c<=82)return'Pancadas';return'Tempestade';}
+  function tempColor(v){return v<18?'#7DF9FF':v<26?'#FFE14D':'#FF8A3D';}
   function drawWeather(){
-    text('Campinas',22,18,'#FFE000');
-    text(Math.round(weather.temp)+'°C',72,52,'#FFFFFF',700);
-    text(wDesc(weather.code),110,18,'#00E08A');
-    g.font='500 15px "IBM Plex Mono", ui-monospace, monospace';g.textAlign='left';g.fillStyle='#C8C8C8';
-    g.fillText('Sensação  '+Math.round(weather.feels)+'°C',34,140);
-    g.fillText('Umidade   '+Math.round(weather.hum)+'%',34,160);
-    g.fillText('Vento     '+Math.round(weather.wind)+' km/h',34,180);
-    g.fillText('Máx/Mín   '+Math.round(weather.max)+'/'+Math.round(weather.min)+'°C',34,200);
-    if(weather.example){g.font='500 10px "IBM Plex Mono", monospace';g.fillStyle='#A65D00';g.textAlign='right';g.fillText('exemplo',234,10);}
+    grad('#00A8E8','#2D1E8F');rainbow();
+    text('Campinas',24,18,'#FFFFFF');
+    g.save();g.translate(3,3);text(Math.round(weather.temp)+'°C',72,52,'#1B1464',700);g.restore();
+    text(Math.round(weather.temp)+'°C',72,52,tempColor(weather.temp),700);
+    text(wDesc(weather.code),110,18,'#FFFFFF');
+    rrect(16,124,208,88,10,'#24187A');
+    const rows=[['Sensação',Math.round(weather.feels)+'°C'],['Umidade',Math.round(weather.hum)+'%'],['Vento',Math.round(weather.wind)+' km/h'],['Máx/Mín',Math.round(weather.max)+'/'+Math.round(weather.min)+'°C']];
+    g.font='500 15px "IBM Plex Mono", ui-monospace, monospace';g.textBaseline='middle';
+    rows.forEach(([k,v],i)=>{const y=138+i*20;g.textAlign='left';g.fillStyle='#9FD8FF';g.fillText(k,28,y);g.textAlign='right';g.fillStyle='#FFFFFF';g.fillText(v,212,y);});
+    if(weather.example)tag();
   }
   function draw(){
     const t=br();
-    g.fillStyle='#000';g.fillRect(0,0,W,H);
     if(auto&&Date.now()-autoTick>=30000){autoTick=Date.now();setScreen((screen+1)%3);}
     if(screen===0)drawClock(t);else if(screen===1)drawMarket();else drawWeather();
     dots();
