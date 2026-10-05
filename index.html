@@ -303,13 +303,21 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     text(DIAS[t.wd],174,18,'#7DF9FF');
     text(pad(t.D)+' '+MESES[t.M]+' '+t.Y,198,16,'#FFFFFF',500);
   }
+  // cabeçalho das outras telas: título à esquerda, hora (HH:MM + :SS menor) à direita
+  function header(title,color){
+    const t=br(),F='"Chakra Petch", ui-monospace, monospace',hm=pad(t.h)+':'+pad(t.m),ss=':'+pad(t.s),base=30;
+    g.textBaseline='alphabetic';
+    g.font='600 18px '+F;g.textAlign='left';g.fillStyle=color;g.fillText(title,14,base);
+    g.font='700 13px '+F;const wS=g.measureText(ss).width;g.textAlign='right';g.fillStyle='#FFD1F0';g.fillText(ss,228,base);
+    g.font='700 20px '+F;g.fillStyle='#FFFFFF';g.fillText(hm,228-wS-1,base);
+  }
   // ---------- Tela 2: Bolsa B3 ----------
   let market={ibov:131245,ibovChg:0.84,top:[{t:'MGLU3',p:9.87,c:5.42},{t:'AZUL4',p:6.15,c:4.07},{t:'CVCB3',p:2.38,c:3.48}],example:true};
   const brl=(n,d)=>n.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
   const pct=n=>(n>=0?'+':'')+brl(n,2)+'%';
   function drawMarket(){
     grad('#123A8C','#0A0F2C');rainbow();
-    text('Bolsa B3',24,18,'#FFE14D');
+    header('Bolsa B3','#FFE14D');
     text('IBOVESPA',50,13,'#9FC4FF',500);
     text(brl(market.ibov,0)+' pts',76,28,'#FFFFFF',700);
     const up=market.ibovChg>=0;
@@ -331,7 +339,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
   function tempColor(v){return v<18?'#7DF9FF':v<26?'#FFE14D':'#FF8A3D';}
   function drawWeather(){
     grad('#00A8E8','#2D1E8F');rainbow();
-    text('Campinas',24,18,'#FFFFFF');
+    header('Campinas','#FFFFFF');
     g.save();g.translate(3,3);text(Math.round(weather.temp)+'°C',72,52,'#1B1464',700);g.restore();
     text(Math.round(weather.temp)+'°C',72,52,tempColor(weather.temp),700);
     text(wDesc(weather.code),110,18,'#FFFFFF');
