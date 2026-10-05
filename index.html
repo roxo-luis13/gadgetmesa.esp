@@ -252,9 +252,16 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
 <script>
 (function(){
   const cv=document.getElementById('tft'), g=cv.getContext('2d');
-  const W=240,H=240;
-  // alta resolução: desenha em 4× (960×960 px reais) mantendo as coordenadas 240×240 do TFT
-  const S=4;cv.width=W*S;cv.height=H*S;
+  // O layout é o do TFT (240×240). A tela se adapta ao tamanho e formato da janela:
+  // fundo, faixa e pontinhos ocupam tudo; o conteúdo escala pelo lado menor e fica centralizado.
+  let W=240,H=240,k=4,ox=0,oy=0;
+  function fit(){
+    const cw=cv.clientWidth||240, ch=cv.clientHeight||240, d=Math.max(window.devicePixelRatio||1,2);
+    const bw=Math.round(cw*d), bh=Math.round(ch*d);
+    if(cv.width!==bw||cv.height!==bh){cv.width=bw;cv.height=bh;}
+    k=Math.min(bw,bh)/240;W=bw/k;H=bh/k;ox=(W-240)/2;oy=(H-240)/2;
+  }
+  function full(fn){g.save();g.setTransform(k,0,0,k,0,0);fn();g.restore();}
   let screen=0, auto=true, autoTick=Date.now(), forceWaterUntil=0;
   let weather={temp:26,feels:27,hum:58,wind:9,code:2,max:29,min:17,example:true};
 
@@ -266,20 +273,20 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
   function br(){const d=new Date(Date.now()-3*3600e3);return{h:d.getUTCHours(),m:d.getUTCMinutes(),s:d.getUTCSeconds(),ms:d.getUTCMilliseconds(),wd:d.getUTCDay(),D:d.getUTCDate(),M:d.getUTCMonth(),Y:d.getUTCFullYear()};}
   function greet(h){return h>=5&&h<12?'Bom dia!':h>=12&&h<18?'Boa tarde!':'Boa noite!';}
 
-  function text(t,y,size,color,weight){g.font=(weight||600)+' '+size+'px "Chakra Petch", ui-monospace, monospace';g.fillStyle=color;g.textAlign='center';g.textBaseline='middle';g.fillText(t,W/2,y);}
+  function text(t,y,size,color,weight){g.font=(weight||600)+' '+size+'px "Chakra Petch", ui-monospace, monospace';g.fillStyle=color;g.textAlign='center';g.textBaseline='middle';g.fillText(t,120,y);}
   // Paleta "criativa" — todas as cores existem em RGB565 e os degradês viram fillRectVGradient() no TFT_eSPI
   const RAINBOW=['#FF3D7F','#FF8A3D','#FFE14D','#3DFF8A','#3DC8FF','#9B5CFF'];
-  function grad(top,bot){const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,top);gr.addColorStop(1,bot);g.fillStyle=gr;g.fillRect(0,0,W,H);}
-  function rainbow(){RAINBOW.forEach((c,i)=>{g.fillStyle=c;g.fillRect(i*40,0,40,4);});}
+  function grad(top,bot){full(()=>{const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,top);gr.addColorStop(1,bot);g.fillStyle=gr;g.fillRect(0,0,W,H);});}
+  function rainbow(){full(()=>RAINBOW.forEach((c,i)=>{g.fillStyle=c;g.fillRect(i*W/6,0,W/6+0.5,4);}));}
   function rrect(x,y,w,h,r,c){g.fillStyle=c;g.beginPath();g.roundRect(x,y,w,h,r);g.fill();}
-  function dots(){for(let i=0;i<3;i++){g.beginPath();g.arc(W/2+(i-1)*14,228,i===screen?4:3,0,Math.PI*2);g.fillStyle=i===screen?'#FFE14D':'#6B6B9E';g.fill();}}
+  function dots(){full(()=>{for(let i=0;i<3;i++){g.beginPath();g.arc(W/2+(i-1)*14,H-12,i===screen?4:3,0,Math.PI*2);g.fillStyle=i===screen?'#FFE14D':'#6B6B9E';g.fill();}});}
 
   // céu muda com a saudação: manhã = nascer do sol, tarde = pôr do sol, noite = céu estrelado
   function period(h){return h>=5&&h<12?{top:'#FF8A3D',bot:'#7A1FA2',hi:'#FFFFFF',sh:'#C2185B'}:h>=12&&h<18?{top:'#FF3D7F',bot:'#3B1C9E',hi:'#FFE14D',sh:'#5B1FA8'}:{top:'#1B1464',bot:'#0B0B2E',hi:'#7DF9FF',sh:'#9B5CFF'};}
   const STARS=[[18,40],[60,22],[200,30],[222,64],[30,96],[214,140],[16,170],[226,196],[44,214],[190,214]];
   function drawClock(t){
     const P=period(t.h);grad(P.top,P.bot);rainbow();
-    if(t.h<5||t.h>=18){g.fillStyle='#FFFFFF';STARS.forEach(([x,y])=>g.fillRect(x,y,2,2));}
+    if(t.h<5||t.h>=18){g.fillStyle='#FFFFFF';full(()=>STARS.forEach(([x,y])=>g.fillRect(x*W/240,y*H/240,2,2)));}
     text(greet(t.h),28,20,P.hi);
     const nowMs=Date.now();
     // "Beba Água!": a cada 5 min, 7 s, pisca a cada 250 ms
@@ -331,7 +338,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
   }
   function draw(){
     const t=br();
-    g.setTransform(S,0,0,S,0,0);
+    fit();g.setTransform(k,0,0,k,ox*k,oy*k);
     if(auto&&Date.now()-autoTick>=30000){autoTick=Date.now();setScreen((screen+1)%3);}
     if(screen===0)drawClock(t);else if(screen===1)drawMarket();else drawWeather();
     dots();
@@ -405,15 +412,16 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     pipWin=pw;
     pw.addEventListener('resize',()=>{if(pipWin!==pw)return;pipSize=Math.round(Math.min(pw.innerWidth,pw.innerHeight));saveSize();});
     const st=pw.document.createElement('style');
-    st.textContent='html,body{margin:0;height:100%;background:#000;overflow:hidden}body{display:grid;place-items:center}'+
+    st.textContent='html,body{margin:0;height:100%;background:#000;overflow:hidden}canvas{display:block}'+
       '.z{position:fixed;top:6px;right:6px;display:flex;gap:4px;opacity:0;transition:opacity .2s}body:hover .z{opacity:1}'+
       '.z button{width:30px;height:30px;border-radius:15px;border:0;background:rgba(20,10,45,.75);color:#fff;font:700 18px system-ui;cursor:pointer}'+
       '.z button:hover{background:#7b3fe4}';
     pw.document.head.append(st);
+    document.querySelectorAll('link[rel=stylesheet]').forEach(l=>pw.document.head.append(l.cloneNode()));
     const z=pw.document.createElement('div');z.className='z';
     [['−',-60,'Diminuir'],['+',60,'Aumentar']].forEach(([l,d,t])=>{const b=pw.document.createElement('button');b.textContent=l;b.title=t;b.onclick=()=>resizePip(d);z.append(b);});
     const holder=cv.parentNode, next=cv.nextSibling;
-    cv.style.cssText='width:100vmin;height:100vmin;border:0;border-radius:0';
+    cv.style.cssText='width:100vw;height:100vh;border:0;border-radius:0';
     pw.document.body.append(cv,z);
     say('Relógio em Picture-in-Picture. Mude o tamanho arrastando a borda da janelinha, pelos botões − e + que aparecem nela ou pelos botões abaixo.');
     pw.addEventListener('pagehide',()=>{if(pipWin!==pw)return;pipWin=null;cv.style.cssText='';holder.insertBefore(cv,next);say('O relógio flutua sobre as outras janelas e continua atualizando.');});
