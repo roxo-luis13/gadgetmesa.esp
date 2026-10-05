@@ -292,12 +292,16 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     // "Beba Água!": a cada 5 min, 7 s, pisca a cada 250 ms
     const inWindow=(t.m%5===0&&t.s<7)||nowMs<forceWaterUntil;
     if(inWindow&&Math.floor(nowMs/250)%2===0){rrect(30,56,180,36,18,'#00D1FF');text('Beba Água!',75,26,'#0B0B2E',700);}
-    const hm=pad(t.h)+':'+pad(t.m);
-    g.save();g.translate(3,3);text(hm,122,58,P.sh,700);g.restore();
-    text(hm,122,58,'#FFFFFF',700);
-    text(':'+pad(t.s),160,18,'#FFD1F0');
-    text(DIAS[t.wd],184,18,'#7DF9FF');
-    text(pad(t.D)+' '+MESES[t.M]+' '+t.Y,206,16,'#FFFFFF',500);
+    // HH:MM grande com :SS menor ao lado, alinhados pela base e centralizados juntos
+    const hm=pad(t.h)+':'+pad(t.m), ss=':'+pad(t.s), F='"Chakra Petch", ui-monospace, monospace', base=142;
+    g.font='700 54px '+F;const wHM=g.measureText(hm).width;
+    g.font='700 24px '+F;const wS=g.measureText(ss).width;
+    const x0=120-(wHM+3+wS)/2;
+    g.textAlign='left';g.textBaseline='alphabetic';
+    g.font='700 54px '+F;g.fillStyle=P.sh;g.fillText(hm,x0+3,base+3);g.fillStyle='#FFFFFF';g.fillText(hm,x0,base);
+    g.font='700 24px '+F;g.fillStyle=P.sh;g.fillText(ss,x0+wHM+3+2,base+2);g.fillStyle='#FFD1F0';g.fillText(ss,x0+wHM+3,base);
+    text(DIAS[t.wd],174,18,'#7DF9FF');
+    text(pad(t.D)+' '+MESES[t.M]+' '+t.Y,198,16,'#FFFFFF',500);
   }
   // ---------- Tela 2: Bolsa B3 ----------
   let market={ibov:131245,ibovChg:0.84,top:[{t:'MGLU3',p:9.87,c:5.42},{t:'AZUL4',p:6.15,c:4.07},{t:'CVCB3',p:2.38,c:3.48}],example:true};
