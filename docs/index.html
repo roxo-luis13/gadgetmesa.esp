@@ -103,7 +103,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
       <div class="controls">
         <div class="seg" role="group" aria-label="Trocar tela">
           <button id="b0" data-s="0" aria-pressed="true">Relógio</button>
-          <button id="b1" data-s="1" aria-pressed="false">Tela 2</button>
+          <button id="b1" data-s="1" aria-pressed="false">Bolsa</button>
           <button id="b2" data-s="2" aria-pressed="false">Clima</button>
         </div>
         <button id="pipBtn" class="pip">Abrir em Picture-in-Picture</button>
@@ -123,7 +123,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
             <span class="tag">Build 1 · principal</span>
             <h3>Relógio WiFi</h3>
             <ul>
-              <li>3 telas: relógio, teste e clima</li>
+              <li>3 telas: relógio, bolsa B3 e clima</li>
               <li>Saudação por horário e lembrete de água</li>
               <li>Clima de Campinas pelo Open-Meteo</li>
               <li>Troca de tela pelo celular (WebServer, porta 80)</li>
@@ -158,8 +158,8 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
           <li><strong>"Beba Água!"</strong> piscando a cada <code>5 min</code>, dura <code>7 s</code>, pisca a cada <code>250 ms</code>, fonte tamanho <code>4</code>.</li>
           <li>O ícone de gota foi removido.</li>
         </ul>
-        <h3>Tela 2: Teste</h3>
-        <p>Texto "Teste de tela 2", reservado para conteúdo futuro.</p>
+        <h3>Tela 2: Bolsa B3 <span class="chip">em preview</span></h3>
+        <p>Pontos e variação do dia do Ibovespa e as 3 ações que mais sobem no dia (ticker, preço e alta em %). Dados da brapi.dev, atualizados a cada 10 minutos. Substituiu o texto "Teste de tela 2".</p>
         <h3>Tela 3: Clima</h3>
         <p>Open-Meteo para Campinas (<code>-22.9056, -47.0608</code>), atualizado a cada 10 minutos, layout ajustado para 240×240.</p>
         <h3>Navegação</h3>
@@ -231,14 +231,14 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
         <h2>Próximos passos</h2>
         <ul class="todo">
           <li>Buzzer para o despertador</li>
-          <li>Conteúdo real para a Tela 2</li>
+          <li>Gerar o <code>.ino</code> da Tela 2 (bolsa) depois do preview aprovado</li>
           <li>Unificar as builds: alarmes e timer controlados pela página web</li>
           <li>Refinar layouts e criar novas telas</li>
         </ul>
       </section>
     </main>
   </div>
-  <footer>O simulador usa o horário de Brasília (UTC-3). O clima tenta buscar o Open-Meteo ao vivo; se o navegador bloquear, mostra valores de exemplo marcados como tal.</footer>
+  <footer>O simulador usa o horário de Brasília (UTC-3). O clima (Open-Meteo) e a bolsa (brapi.dev) tentam buscar dados ao vivo; se o navegador bloquear, mostra valores de exemplo marcados como tal.</footer>
 </div>
 
 <script>
@@ -273,7 +273,26 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     text(DIAS[t.wd],182,18,'#00E08A');
     text(pad(t.D)+' '+MESES[t.M]+' '+t.Y,204,16,'#C8C8C8',500);
   }
-  function drawTest(){text('Teste de tela 2',112,22,'#FFFFFF');text('(conteúdo futuro)',140,14,'#7A7A7A',500);}
+  // ---------- Tela 2: Bolsa B3 ----------
+  let market={ibov:131245,ibovChg:0.84,top:[{t:'MGLU3',p:9.87,c:5.42},{t:'AZUL4',p:6.15,c:4.07},{t:'CVCB3',p:2.38,c:3.48}],example:true};
+  const brl=(n,d)=>n.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+  const pct=n=>(n>=0?'+':'')+brl(n,2)+'%';
+  function drawMarket(){
+    text('Bolsa B3',22,18,'#FFE000');
+    text('IBOVESPA',50,13,'#9AA0A6',500);
+    text(brl(market.ibov,0)+' pts',76,28,'#FFFFFF',700);
+    text(pct(market.ibovChg),102,16,market.ibovChg>=0?'#00E08A':'#FF4D4D');
+    g.fillStyle='#333333';g.fillRect(20,118,200,1);
+    text('MAIORES ALTAS',134,13,'#9AA0A6',500);
+    g.font='500 15px "IBM Plex Mono", ui-monospace, monospace';g.textBaseline='middle';
+    market.top.slice(0,3).forEach((a,i)=>{
+      const y=158+i*22;
+      g.textAlign='left';g.fillStyle='#FFFFFF';g.fillText(a.t,16,y);
+      g.textAlign='center';g.fillStyle='#C8C8C8';g.fillText(brl(a.p,2),126,y);
+      g.textAlign='right';g.fillStyle='#00E08A';g.fillText(pct(a.c),226,y);
+    });
+    if(market.example){g.font='500 10px "IBM Plex Mono", monospace';g.fillStyle='#A65D00';g.textAlign='right';g.fillText('exemplo',234,10);}
+  }
   function wDesc(c){if(c===0)return'Céu limpo';if(c<=2)return'Parcial nublado';if(c===3)return'Nublado';if(c<=48)return'Neblina';if(c<=67)return'Chuva';if(c<=77)return'Neve';if(c<=82)return'Pancadas';return'Tempestade';}
   function drawWeather(){
     text('Campinas',22,18,'#FFE000');
@@ -290,7 +309,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     const t=br();
     g.fillStyle='#000';g.fillRect(0,0,W,H);
     if(auto&&Date.now()-autoTick>=30000){autoTick=Date.now();setScreen((screen+1)%3);}
-    if(screen===0)drawClock(t);else if(screen===1)drawTest();else drawWeather();
+    if(screen===0)drawClock(t);else if(screen===1)drawMarket();else drawWeather();
     dots();
   }
   function setScreen(i){screen=i;autoTick=Date.now();[0,1,2].forEach(k=>document.getElementById('b'+k).setAttribute('aria-pressed',String(k===i)));draw();}
@@ -311,6 +330,23 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     }catch(e){}
   }
   loadWeather();setInterval(loadWeather,10*60*1000);
+
+  // bolsa ao vivo pela brapi.dev (sem chave para a lista; se falhar, fica o exemplo)
+  async function loadMarket(){
+    try{
+      const r=await fetch('https://brapi.dev/api/quote/list?type=stock&sortBy=change&sortOrder=desc&limit=3');
+      const j=await r.json();
+      const top=(j.stocks||[]).slice(0,3).map(a=>({t:a.stock,p:a.close,c:a.change}));
+      if(top.length===3)market.top=top,market.example=false;
+      try{
+        const r2=await fetch('https://brapi.dev/api/quote/%5EBVSP');
+        const q=(await r2.json()).results[0];
+        if(q&&q.regularMarketPrice)market.ibov=q.regularMarketPrice,market.ibovChg=q.regularMarketChangePercent;
+        else market.example=true;
+      }catch(e){market.example=true;}
+    }catch(e){}
+  }
+  loadMarket();setInterval(loadMarket,10*60*1000);
 
   // ---------- Picture-in-Picture ----------
   const pipBtn=document.getElementById('pipBtn'), msg=document.getElementById('pipMsg'), vid=document.getElementById('pipVideo');
