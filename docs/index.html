@@ -110,6 +110,11 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
           <button id="b2" data-s="2" aria-pressed="false">Clima</button>
         </div>
         <button id="pipBtn" class="pip">Abrir em Picture-in-Picture</button>
+        <div class="seg" role="group" aria-label="Tamanho da janela Picture-in-Picture">
+          <button id="sz1" data-sz="200" aria-pressed="false">Pequena</button>
+          <button id="sz2" data-sz="300" aria-pressed="true">Média</button>
+          <button id="sz3" data-sz="440" aria-pressed="false">Grande</button>
+        </div>
         <button id="waterBtn">Testar "Beba Água!"</button>
         <button id="autoBtn" aria-pressed="true">Trocar tela a cada 30 s</button>
       </div>
@@ -372,14 +377,38 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
   function say(t,err){msg.textContent=t;msg.classList.toggle('err',!!err);}
 
   // 1) Document PiP (Chrome/Edge): move o próprio canvas para a janela flutuante
+  let pipWin=null, pipSize=300;
+  try{const v=+localStorage.getItem('pipSize');if(v>=160&&v<=900)pipSize=v;}catch(e){}
+  const szBtns=[...document.querySelectorAll('[data-sz]')];
+  function markSize(){let best=szBtns[0];szBtns.forEach(b=>{if(Math.abs(b.dataset.sz-pipSize)<Math.abs(best.dataset.sz-pipSize))best=b;});szBtns.forEach(b=>b.setAttribute('aria-pressed',String(b===best)));}
+  function saveSize(){try{localStorage.setItem('pipSize',String(pipSize));}catch(e){}markSize();}
+  // janela quadrada; o navegador só deixa redimensionar a partir de um clique
+  function resizePip(delta,abs){
+    if(!pipWin){if(abs){pipSize=abs;saveSize();}return;}
+    const cur=Math.min(pipWin.innerWidth,pipWin.innerHeight);
+    const n=Math.max(160,Math.min(900,abs||cur+delta));
+    try{pipWin.resizeBy(n-pipWin.innerWidth,n-pipWin.innerHeight);}catch(e){}
+    pipSize=n;saveSize();
+  }
+  szBtns.forEach(b=>b.addEventListener('click',()=>resizePip(0,+b.dataset.sz)));
+  markSize();
   async function docPip(){
-    const pw=await window.documentPictureInPicture.requestWindow({width:260,height:260});
-    pw.document.body.style.cssText='margin:0;background:#000;display:grid;place-items:center;height:100vh';
+    const pw=await window.documentPictureInPicture.requestWindow({width:pipSize,height:pipSize});
+    pipWin=pw;
+    pw.addEventListener('resize',()=>{pipSize=Math.round(Math.min(pw.innerWidth,pw.innerHeight));saveSize();});
+    const st=pw.document.createElement('style');
+    st.textContent='html,body{margin:0;height:100%;background:#000;overflow:hidden}body{display:grid;place-items:center}'+
+      '.z{position:fixed;top:6px;right:6px;display:flex;gap:4px;opacity:0;transition:opacity .2s}body:hover .z{opacity:1}'+
+      '.z button{width:30px;height:30px;border-radius:15px;border:0;background:rgba(20,10,45,.75);color:#fff;font:700 18px system-ui;cursor:pointer}'+
+      '.z button:hover{background:#7b3fe4}';
+    pw.document.head.append(st);
+    const z=pw.document.createElement('div');z.className='z';
+    [['−',-60,'Diminuir'],['+',60,'Aumentar']].forEach(([l,d,t])=>{const b=pw.document.createElement('button');b.textContent=l;b.title=t;b.onclick=()=>resizePip(d);z.append(b);});
     const holder=cv.parentNode, next=cv.nextSibling;
     cv.style.cssText='width:100vmin;height:100vmin;border:0;border-radius:0';
-    pw.document.body.append(cv);
-    say('Relógio aberto em Picture-in-Picture. Feche a janelinha para trazer de volta.');
-    pw.addEventListener('pagehide',()=>{cv.style.cssText='';holder.insertBefore(cv,next);say('O relógio flutua sobre as outras janelas e continua atualizando.');});
+    pw.document.body.append(cv,z);
+    say('Relógio em Picture-in-Picture. Mude o tamanho arrastando a borda da janelinha, pelos botões − e + que aparecem nela ou pelos botões abaixo.');
+    pw.addEventListener('pagehide',()=>{pipWin=null;cv.style.cssText='';holder.insertBefore(cv,next);say('O relógio flutua sobre as outras janelas e continua atualizando.');});
   }
   // 2) Video PiP (Safari, Firefox, Chrome): transmite o canvas para um <video>
   async function videoPip(){
