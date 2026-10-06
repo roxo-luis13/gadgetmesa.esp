@@ -202,7 +202,7 @@ button.go{background:var(--accent);border-color:var(--accent);color:var(--surfac
     g.font='700 20px '+F;g.fillStyle='#FFFFFF';g.fillText(hm,228-wS-1,base);
   }
   // ---------- Tela 2: Bolsa B3 ----------
-  let market={ibov:131245,ibovChg:0.84,top:[{t:'MGLU3',p:9.87,c:5.42},{t:'AZUL4',p:6.15,c:4.07},{t:'CVCB3',p:2.38,c:3.48}],example:true};
+  let market={ibov:131245,ibovChg:0.84,top:[{t:'PETR4',p:37.42,c:1.12},{t:'VALE3',p:61.85,c:-0.64},{t:'ITUB4',p:36.90,c:0.47}],example:true};
   const brl=(n,d)=>n.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
   const pct=n=>(n>=0?'+':'')+brl(n,2)+'%';
   function drawMarket(){
@@ -213,7 +213,7 @@ button.go{background:var(--accent);border-color:var(--accent);color:var(--surfac
     const up=market.ibovChg>=0;
     rrect(84,92,72,20,10,up?'#3DFF8A':'#FF4D6D');
     text((up?'▲ ':'▼ ')+pct(market.ibovChg).replace('+',''),102,14,'#0A0F2C',700);
-    text('MAIORES ALTAS',128,13,'#9FC4FF',500);
+    text('MAIS NEGOCIADAS',128,13,'#9FC4FF',500);
     const medal=['#FF8A3D','#FF3D7F','#9B5CFF'];
     market.top.slice(0,3).forEach((a,i)=>{
       const y=152+i*22;
@@ -222,7 +222,7 @@ button.go{background:var(--accent);border-color:var(--accent);color:var(--surfac
       g.font='500 15px "IBM Plex Mono", ui-monospace, monospace';g.textBaseline='middle';
       g.textAlign='left';g.fillStyle='#FFE14D';g.fillText(a.t,22,y);
       g.textAlign='center';g.fillStyle='#FFFFFF';g.fillText(brl(a.p,2),126,y);
-      g.textAlign='right';g.fillStyle='#3DFF8A';g.fillText(pct(a.c),224,y);
+      g.textAlign='right';g.fillStyle=a.c>=0?'#3DFF8A':'#FF6B85';g.fillText(pct(a.c),224,y);
     });
   }
   function wDesc(c){if(c===0)return'Céu limpo';if(c<=2)return'Parcial nublado';if(c===3)return'Nublado';if(c<=48)return'Neblina';if(c<=67)return'Chuva';if(c<=77)return'Neve';if(c<=82)return'Pancadas';return'Tempestade';}
@@ -361,7 +361,7 @@ button.go{background:var(--accent);border-color:var(--accent);color:var(--surfac
   // bolsa ao vivo pela brapi.dev (sem chave para a lista; se falhar, fica o exemplo)
   async function loadMarket(){
     try{
-      const r=await fetch('https://brapi.dev/api/quote/list?type=stock&sortBy=change&sortOrder=desc&limit=3');
+      const r=await fetch('https://brapi.dev/api/quote/list?type=stock&sortBy=volume&sortOrder=desc&limit=3');
       const j=await r.json();
       const top=(j.stocks||[]).slice(0,3).map(a=>({t:a.stock,p:a.close,c:a.change}));
       if(top.length===3)market.top=top,market.example=false;
