@@ -166,14 +166,22 @@ button.go{background:var(--accent);border-color:var(--accent);color:var(--surfac
   // céu muda com a saudação: manhã = nascer do sol, tarde = pôr do sol, noite = céu estrelado
   function period(h){return h>=5&&h<12?{top:'#FF8A3D',bot:'#7A1FA2',hi:'#FFFFFF',sh:'#C2185B'}:h>=12&&h<18?{top:'#FF3D7F',bot:'#3B1C9E',hi:'#FFE14D',sh:'#5B1FA8'}:{top:'#1B1464',bot:'#0B0B2E',hi:'#7DF9FF',sh:'#9B5CFF'};}
   const STARS=[[18,40],[60,22],[200,30],[222,64],[30,96],[214,140],[16,170],[226,196],[44,214],[190,214]];
+  // "Beba Água!": a cada 5 min, dura 7 s, pisca a cada 250 ms
+  function waterBlink(t){const now=Date.now();return((t.m%5===0&&t.s<7)||now<forceWaterUntil)&&Math.floor(now/250)%2===0;}
+  // nas outras telas: gota d'água no centro do topo (fillTriangle + fillCircle no TFT)
+  function drop(){
+    g.fillStyle='#00D1FF';
+    g.beginPath();g.moveTo(120,13);g.lineTo(113.4,29);g.lineTo(126.6,29);g.closePath();g.fill();
+    g.beginPath();g.arc(120,31,7,0,Math.PI*2);g.fill();
+    g.fillStyle='#FFFFFF';g.beginPath();g.arc(117,32,2,0,Math.PI*2);g.fill();
+  }
   function drawClock(t){
     const P=period(t.h);grad(P.top,P.bot);rainbow();
     if(t.h<5||t.h>=18){g.fillStyle='#FFFFFF';full(()=>STARS.forEach(([x,y])=>g.fillRect(x*W/240,y*H/240,2,2)));}
     text(greet(t.h),28,20,P.hi);
     const nowMs=Date.now();
     // "Beba Água!": a cada 5 min, 7 s, pisca a cada 250 ms
-    const inWindow=(t.m%5===0&&t.s<7)||nowMs<forceWaterUntil;
-    if(inWindow&&Math.floor(nowMs/250)%2===0){rrect(30,56,180,36,18,'#00D1FF');text('Beba Água!',75,26,'#0B0B2E',700);}
+    if(waterBlink(t)){rrect(30,56,180,36,18,'#00D1FF');text('Beba Água!',75,26,'#0B0B2E',700);}
     // HH:MM grande com :SS menor ao lado, alinhados pela base e centralizados juntos
     const hm=pad(t.h)+':'+pad(t.m), ss=':'+pad(t.s), F='"Chakra Petch", ui-monospace, monospace', base=142;
     g.font='700 54px '+F;const wHM=g.measureText(hm).width;
@@ -328,11 +336,12 @@ button.go{background:var(--accent);border-color:var(--accent);color:var(--surfac
     pomoTick();
     if(auto&&!pomo.alert&&Date.now()-autoTick>=30000){autoTick=Date.now();setScreen((screen+1)%(pomoInUse()?4:3));}
     if(screen===0)drawClock(t);else if(screen===1)drawMarket();else if(screen===2)drawWeather();else drawPomo();
+    if(screen!==0&&waterBlink(t))drop();
     dots();
   }
   function setScreen(i){screen=i;autoTick=Date.now();[0,1,2,3].forEach(k=>document.getElementById('b'+k).setAttribute('aria-pressed',String(k===i)));draw();}
   document.querySelectorAll('[data-s]').forEach(b=>b.addEventListener('click',()=>setScreen(+b.dataset.s)));
-  document.getElementById('waterBtn').addEventListener('click',()=>{forceWaterUntil=Date.now()+7000;setScreen(0);});
+  document.getElementById('waterBtn').addEventListener('click',()=>{forceWaterUntil=Date.now()+7000;autoTick=Date.now();});
   const autoBtn=document.getElementById('autoBtn');
   autoBtn.addEventListener('click',()=>{auto=!auto;autoTick=Date.now();autoBtn.setAttribute('aria-pressed',String(auto));});
 
