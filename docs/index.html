@@ -161,7 +161,7 @@ button.go{background:var(--accent);border-color:var(--accent);color:var(--surfac
   function grad(top,bot){full(()=>{const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,top);gr.addColorStop(1,bot);g.fillStyle=gr;g.fillRect(0,0,W,H);});}
   function rainbow(){full(()=>RAINBOW.forEach((c,i)=>{g.fillStyle=c;g.fillRect(i*W/6,0,W/6+0.5,4);}));}
   function rrect(x,y,w,h,r,c){g.fillStyle=c;g.beginPath();g.roundRect(x,y,w,h,r);g.fill();}
-  function dots(){full(()=>{for(let i=0;i<NS;i++){g.beginPath();g.arc(W/2+(i-(NS-1)/2)*14,H-12,i===screen?4:3,0,Math.PI*2);g.fillStyle=i===screen?'#FFE14D':'#6B6B9E';g.fill();}});}
+  function dots(){full(()=>{const NS=nScreens();for(let i=0;i<NS;i++){g.beginPath();g.arc(W/2+(i-(NS-1)/2)*14,H-12,i===screen?4:3,0,Math.PI*2);g.fillStyle=i===screen?'#FFE14D':'#6B6B9E';g.fill();}});}
 
   // céu muda com a saudação: manhã = nascer do sol, tarde = pôr do sol, noite = céu estrelado
   function period(h){return h>=5&&h<12?{top:'#FF8A3D',bot:'#7A1FA2',hi:'#FFFFFF',sh:'#C2185B'}:h>=12&&h<18?{top:'#FF3D7F',bot:'#3B1C9E',hi:'#FFE14D',sh:'#5B1FA8'}:{top:'#1B1464',bot:'#0B0B2E',hi:'#7DF9FF',sh:'#9B5CFF'};}
@@ -232,7 +232,9 @@ button.go{background:var(--accent);border-color:var(--accent);color:var(--surfac
   }
   // ---------- Tela 4: Pomodoro ----------
   // Baseado no timer regressivo da build despertador: inicia/pausa, e no fim pisca vermelho/preto até alguém tocar.
-  const NS=4;
+  // o Pomodoro só entra na troca de telas (e nos pontinhos) quando está em uso
+  const pomoInUse=()=>pomo.running||pomo.alert||pomo.mode!=='foco'||pomo.cycle!==1||pomo.remaining<dur('foco');
+  const nScreens=()=>pomoInUse()||screen===3?4:3;
   const MODES={foco:{nome:'FOCO',top:'#FF5E3A',bot:'#8E1B3A',trk:'#5A1026'},curta:{nome:'PAUSA CURTA',top:'#00B894',bot:'#0B3D5C',trk:'#08303F'},longa:{nome:'PAUSA LONGA',top:'#3DC8FF',bot:'#2D1E8F',trk:'#1F1566'}};
   const cfg={foco:25,curta:5,longa:15,ciclos:4,som:true};
   try{Object.assign(cfg,JSON.parse(localStorage.getItem('pomoCfg')||'{}'));}catch(e){}
@@ -324,7 +326,7 @@ button.go{background:var(--accent);border-color:var(--accent);color:var(--surfac
     const t=br();
     fit();g.setTransform(k,0,0,k,ox*k,oy*k);
     pomoTick();
-    if(auto&&!pomo.alert&&Date.now()-autoTick>=30000){autoTick=Date.now();setScreen((screen+1)%NS);}
+    if(auto&&!pomo.alert&&Date.now()-autoTick>=30000){autoTick=Date.now();setScreen((screen+1)%(pomoInUse()?4:3));}
     if(screen===0)drawClock(t);else if(screen===1)drawMarket();else if(screen===2)drawWeather();else drawPomo();
     dots();
   }
