@@ -269,10 +269,9 @@ button.go{background:var(--accent);border-color:var(--accent);color:var(--surfac
   }
   function ack(){
     if(!pomo.alert)return false;
-    const fimDoFoco=pomo.mode==='foco';
     pomo.alert=false;advance();autoTick=Date.now();
-    // ao confirmar o fim do foco, a pausa já começa a contar
-    if(fimDoFoco){pomo.endAt=Date.now()+pomo.remaining;pomo.running=true;}
+    // ao confirmar o fim (tocando na tela, inclusive no PiP), a próxima etapa já começa a contar
+    pomo.endAt=Date.now()+pomo.remaining;pomo.running=true;
     pomoUI();return true;
   }
   function drawPomo(){
